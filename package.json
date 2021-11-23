@@ -1,0 +1,20 @@
+{
+  "name": "threejs-exercize",
+  "version": "1.0.0",
+  "description": "threejs 实战案例",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/QuarkGluonPlasma/threejs-exercize.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/QuarkGluonPlasma/threejs-exercize/issues"
+  },
+  "homepage": "https://github.com/QuarkGluonPlasma/threejs-exercize#readme"
+}
