@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>音乐频谱可视化</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="./js/three.js"></script>
+    <script src="./js/OrbitControls.js"></script>
+</head>
+<body>
+<script>
+    let audioCtx = new AudioContext();
+    let source, analyser;
+
+    function getData() {
+        source = audioCtx.createBufferSource();
+        analyser = audioCtx.createAnalyser();
+
+        return fetch('./music/一路生花.mp3')
+            .then(function(response) {
+                if (!response.ok) {
+                    throw new Error("HTTP error, status = " + response.status);
+                }
+                return response.arrayBuffer();
+            })
+            .then(function(arrayBuffer) {
+                audioCtx.decodeAudioData(arrayBuffer, function(decodedData) {
+                    source.buffer = decodedData;
+                    source.connect(analyser);
+                    analyser.connect(audioCtx.destination);
+                });
+            });
+    };
+
+    function triggerHandler() {
+        getData().then(function() {
+            source.start(0);
+            create();
+            render();
+        });
+        document.removeEventListener('mousedown', triggerHandler)
+    }
+    document.addEventListener('mousedown', triggerHandler);
+
+    const STEP = 50;
+    const CUBE_NUM = Math.ceil(1024 / STEP);
+    const FLOWER_NUM = 400;
+
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+
+    const renderer = new THREE.WebGLRenderer();
+    /**
+     * 花瓣分组
+     */
+    const petal = new THREE.Group();
+
+    /**
+     * 频谱立方体
+     */
+    const cubes = new THREE.Group();
+
+    function create() {
+        const pointLight = new THREE.PointLight( 0xffffff );
+        pointLight.position.set(0, 300, 40);
+        scene.add(pointLight);
+
+
+        camera.position.set(0,300, 400);
+        camera.lookAt(scene.position);
+
+        renderer.setSize(width, height);
+        document.body.appendChild(renderer.domElement)
+
+        renderer.render(scene, camera)
+
+        for (let i = 0; i < CUBE_NUM; i ++ ) {
+            const geometry = new THREE.BoxGeometry( 10, 10, 10 );
+            const material = new THREE.MeshPhongMaterial({color: 'yellowgreen'});
+            const cube = new THREE.Mesh( geometry, material );
+            cube.translateX((10 + 10) * i);
+            cube.translateY(1);
+
+            cubes.add(cube);
+        }
+        cubes.translateX(- (10 +10) * CUBE_NUM / 2);
+
+
+        var flowerTexture1 = new THREE.TextureLoader().load("img/flower1.png");
+        var flowerTexture2 = new THREE.TextureLoader().load("img/flower2.png");
+        var flowerTexture3 = new THREE.TextureLoader().load("img/flower3.png");
+        var flowerTexture4 = new THREE.TextureLoader().load("img/flower4.png");
+        var flowerTexture5 = new THREE.TextureLoader().load("img/flower5.png");
+        var imageList = [flowerTexture1, flowerTexture2, flowerTexture3, flowerTexture4, flowerTexture5];
+
+        for (let i = 0; i < FLOWER_NUM; i++) {
+            var spriteMaterial = new THREE.SpriteMaterial({
+                map: imageList[Math.floor(Math.random() * imageList.length)],
+            });
+            var sprite = new THREE.Sprite(spriteMaterial);
+            petal.add(sprite);
+
+            sprite.scale.set(40, 50, 1); 
+            sprite.position.set(2000 * (Math.random() - 0.5), 500 * Math.random(), 2000 * (Math.random() - 0.5))
+        }
+
+        scene.add(cubes);
+        scene.add(petal);
+    }
+
+    function render() {
+        petal.children.forEach(sprite => {
+            sprite.position.y -= 5;
+            sprite.position.x += 0.5;
+            if (sprite.position.y < - height / 2) {
+                sprite.position.y = height / 2;
+            }
+            if (sprite.position.x > 1000) {
+                sprite.position.x = -1000;
+            }
+        });
+
+        const frequencyData = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(frequencyData);
+
+        const averageFrequencyData = [];
+        for (let i = 0; i< frequencyData.length; i += STEP) {
+            let sum = 0;
+            for(let j = i; j < i + STEP; j++) {
+                sum += frequencyData[j];
+            }
+            averageFrequencyData.push(sum / STEP);
+        }
+        for (let i = 0; i < averageFrequencyData.length; i++) {
+            cubes.children[i].scale.y = Math.floor(averageFrequencyData[i] * 0.4);
+        }
+
+        scene.rotateX(0.005);
+        renderer.render(scene, camera);
+
+        requestAnimationFrame(render);
+    }
+
+    const controls = new THREE.OrbitControls(camera);
+
+</script>
+</body>
+</html>

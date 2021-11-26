@@ -7,6 +7,8 @@ threejs 实战案例
 
 [生日蛋糕](./birthday-cake)
 
+[音乐频谱可视化](./music-visualize)
+
 # 运行
 
 ```
