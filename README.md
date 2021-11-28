@@ -12,7 +12,7 @@ threejs 实战案例
 # 运行
 
 ```
-npx http-sever .
+npx http-server .
 ```
 
 然后浏览器访问对应的网址
