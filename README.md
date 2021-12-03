@@ -9,6 +9,8 @@ threejs 实战案例
 
 [音乐频谱可视化](./music-visualize)
 
+[全景浏览](./panorama)
+
 # 运行
 
 ```

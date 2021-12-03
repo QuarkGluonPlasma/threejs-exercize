@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>全景图</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="./js/three.js"></script>
+    <script src="./js/OrbitControls.js"></script>
+</head>
+<body>
+<script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer();
+
+    camera.position.set(0,0, 100);
+    camera.lookAt(scene.position);
+
+    renderer.setSize(width, height);
+    document.body.appendChild(renderer.domElement)
+
+    function create() {
+        let urls = [
+            './img/home.left.jpg',
+            './img/home.right.jpg',
+            './img/home.top.jpg',
+            './img/home.bottom.jpg',
+            './img/home.front.jpg',
+            './img/home.back.jpg'
+        ];
+        let cubeTexture = new THREE.CubeTextureLoader().load(urls);
+        scene.background = cubeTexture;
+    }
+
+    function render() {
+        renderer.render(scene, camera);
+        requestAnimationFrame(render);
+    }
+
+    create();
+    render();
+    const controls = new THREE.OrbitControls(camera);
+
+</script>
+</body>
+</html>
