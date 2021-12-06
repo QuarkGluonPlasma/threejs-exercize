@@ -11,6 +11,8 @@ threejs 实战案例
 
 [全景浏览](./panorama)
 
+[房子](./house)
+
 # 运行
 
 ```
