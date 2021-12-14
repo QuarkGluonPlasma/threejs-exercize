@@ -13,6 +13,8 @@ threejs 实战案例
 
 [房子](./house)
 
+[地图旅行](./map-travel)
+
 # 运行
 
 ```
