@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+    <script src="./js/three.js"></script>
+    <script src="./js/tween.js"></script>
+    <script src="./js/FontLoader.js"></script>
+    <script src="./js/TextGeometry.js"></script>
+    <script src="./js/FBXLoader.js"></script>
+    <script src="./js/fflate.js"></script>
+</head>
+<body>
+    <script>
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+
+        const scene = new THREE.Scene();
+        const renderer = new THREE.WebGLRenderer();
+
+        camera.position.set(100, 0, 400);
+        camera.lookAt(scene.position);
+
+        renderer.setSize(width, height);
+        document.body.appendChild(renderer.domElement)
+
+        function create() {
+            const vertices = [];
+            for ( let i = 0; i < 30000; i ++ ) {
+                const x = THREE.MathUtils.randFloatSpread( 2000 );
+                const y = THREE.MathUtils.randFloatSpread( 2000 );
+                const z = THREE.MathUtils.randFloatSpread( 2000 );
+                vertices.push( x, y, z );
+            }
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute( 'position', new THREE.Float32BufferAttribute( vertices, 3 ) );
+
+            const star = new THREE.TextureLoader().load('img/star.png');
+            const material = new THREE.PointsMaterial( { size: 10, map: star });
+
+            const points = new THREE.Points( geometry, material );
+            points.translateY(-100);
+            scene.add(points);
+
+            const loader = new THREE.FBXLoader();
+            loader.load('./obj/fu.fbx', function (object) {
+                const startPositions = geometry.getAttribute('position');
+                const destPosition = object.children[0].geometry.getAttribute('position')
+                for(let i = 0; i< startPositions.count; i++) {
+                    const tween = new TWEEN.Tween(startPositions.array);
+                    const cur = i % destPosition.count;
+                    tween.to({
+                        [i * 3]: destPosition.array[cur * 3],
+                        [i * 3 + 1]: destPosition.array[cur * 3 + 1],
+                        [i * 3 + 2]: destPosition.array[cur * 3 + 2]
+                    }, 3000 * Math.random());
+                    tween.easing(TWEEN.Easing.Exponential.In);
+                    tween.delay(3000);
+
+                    tween.start();
+
+                    tween.onUpdate(() => {
+                        startPositions.needsUpdate = true;
+                    });
+                }
+            } );
+        }
+
+        function render() {
+            TWEEN.update();
+            renderer.render(scene, camera);
+            scene.rotation.y += 0.001;
+
+            requestAnimationFrame(render);
+        }
+        create();
+        render();
+    </script>
+</body>
+</html>

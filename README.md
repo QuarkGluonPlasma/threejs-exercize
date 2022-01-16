@@ -15,6 +15,8 @@ threejs 实战案例
 
 [地图旅行](./map-travel)
 
+[群星送福](./happy-spring-festival)
+
 # 运行
 
 ```
