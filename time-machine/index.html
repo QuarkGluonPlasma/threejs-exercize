@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>时光机</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <script src="https://www.unpkg.com/three@0.154.0/build/three.js"></script>
+</head>
+<body>
+<script>
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+
+    const scene = new THREE.Scene();
+    const renderer = new THREE.WebGLRenderer();
+
+	renderer.setSize(width, height);
+    camera.position.set(0, 0, 500);
+    camera.lookAt(scene.position);
+
+	const pointLight = new THREE.PointLight( 0xffffff );
+	pointLight.position.set(0, 0, 500);
+	scene.add(pointLight);
+
+    document.body.appendChild(renderer.domElement)
+
+	let tunnel;
+	let stormTexture;
+    function create() {
+		const textureLoader = new THREE.TextureLoader();
+		textureLoader.load('storm.jpg', function(texture) {
+			stormTexture = texture;
+
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+			texture.repeat.set( 1, 2 );
+
+			const geometry = new THREE.CylinderGeometry( 30, 50, 1000, 32, 32, true);
+			const material = new THREE.MeshPhongMaterial({ 
+				transparent: true,
+				alphaMap: texture,
+				side: THREE.BackSide
+			});
+			tunnel = new THREE.Mesh(geometry, material);
+
+			tunnel.rotation.x = -Math.PI / 2;
+
+			scene.add(tunnel);
+		});
+
+		textureLoader.load('metal.png', function(texture) {
+			texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+			texture.repeat.set( 10, 10 );
+
+			const geometry = new THREE.BoxGeometry( 30, 2, 30 ); 
+
+			const material = new THREE.MeshPhongMaterial( {
+				map: texture
+			});
+
+			const cube = new THREE.Mesh( geometry, material ); 
+			cube.position.z = 460;
+			cube.position.y = -20;
+			scene.add( cube );
+		});	
+    }
+
+	let H = 0;
+    function render() {
+        renderer.render(scene, camera);
+
+		H += 0.002;
+        if (H > 1) { H = 0; }
+
+		if(tunnel) {
+			tunnel.material.color.setHSL(H, 0.5, 0.5);
+
+			tunnel.rotation.y += 0.01;
+			stormTexture.offset.y += 0.01;
+		}
+        requestAnimationFrame(render);
+    }
+
+    create();
+    render();
+
+</script>
+</body>
+</html>
